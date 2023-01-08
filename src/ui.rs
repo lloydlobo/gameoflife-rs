@@ -2,8 +2,6 @@
 //!
 //! [Reference](https://github.com/bevyengine/bevy/blob/latest/examples/ui/button.rs)
 //!
-//! NOTE: Inverted y axis. everything goes from bottom-up, not top-down.
-// FIXME: See if the above claim is true. inverted y axis?
 
 use bevy::prelude::*;
 
@@ -127,7 +125,7 @@ fn button_system(
 /// * Fill.
 fn startup_system_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     // UI camera.
-    commands.spawn(Camera2dBundle::default());
+    commands.spawn(Camera2dBundle::default()); // commands.spawn_bundle(UiCameraBundle::default());
 
     commands
         .spawn(NodeBundle {
@@ -136,8 +134,9 @@ fn startup_system_setup(mut commands: Commands, asset_server: Res<AssetServer>) 
                 Style {
                     size: Size::new(Val::Percent(100f32), Val::Percent(100f32)),
                     justify_content: JustifyContent::SpaceBetween,
+                    align_items: AlignItems::FlexEnd,
                     ..default()
-                }
+                } // NOTE: Inverted y axis. everything goes from bottom-up, not top-down.
             },
             background_color: Color::NONE.into(),
             ..default()
