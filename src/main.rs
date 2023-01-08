@@ -17,6 +17,20 @@ use ui::*;
 
 const GRID_SIZE: i32 = 100;
 
+/// One of the two settings that can be set through the menu. It will be a resource in the app
+/// https://github.com/bevyengine/bevy/blob/latest/examples/games/game_menu.rs
+#[derive(Resource, Debug, Component, PartialEq, Eq, Clone, Copy)]
+enum DisplayQuality {
+    Low,
+    Medium,
+    High,
+}
+
+/// One of the two settings that can be set through the menu. It will be a resource in the app
+/// https://github.com/bevyengine/bevy/blob/latest/examples/games/game_menu.rs
+#[derive(Resource, Debug, Component, PartialEq, Eq, Clone, Copy)]
+struct Volume(u32);
+
 //-------------------------------------------------------------------------------------------------
 
 /// NOTE: Since bevy 0.9 - The `WindowDescriptor` settings have been moved
@@ -34,16 +48,19 @@ fn main() {
             },
             ..default()
         }))
+        // Insert as resource the initial value for the settings resources
+        .insert_resource(DisplayQuality::Medium)
+        .insert_resource(Volume(7))
+        // .add_plugin(SimulationPlugin)
+        // .add_plugin(InputPlugin)
+        .add_plugin(MenuPlugin)
+        //bevy window stock systems.
         .add_plugin(LogDiagnosticsPlugin::default())
         .add_plugin(FrameTimeDiagnosticsPlugin)
-        // .add_plugins(SimulationPlugin)
-        // .add_plugins(InputPlugin)
-        // .add_plugins(MainMenuPlugin)
-        //bevy window stock systems.
         .add_system(change_title)
         .add_system(toggle_cursor)
         .add_system(toggle_vsync)
-        .add_system(cycle_cursor_icon)
+        // .add_system(cycle_cursor_icon)
         .run();
 }
 

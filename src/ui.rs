@@ -3,14 +3,18 @@
 //! [Reference](https://github.com/bevyengine/bevy/blob/latest/examples/ui/button.rs)
 //!
 //! NOTE: Inverted y axis. everything goes from bottom-up, not top-down.
+// FIXME: See if the above claim is true. inverted y axis?
 
 use bevy::prelude::*;
 
-const NORMAL_BUTTON: Color = Color::rgb(0.8, 0.8, 0.8);
-const HOVERED_BUTTON: Color = Color::rgb(0.4, 0.8, 0.8);
-const PRESSED_BUTTON: Color = Color::rgb(0.4, 1.0, 1.0);
+// https://github.com/bevyengine/bevy/blob/latest/examples/games/game_menu.rs
+// This plugin manages the menu, with 5 different screens:
+// - a main menu with "New Game", "Settings", "Quit"
+// - a settings menu with two submenus and a back button
+// - two settings screen with a setting that can be set and a back button
+pub struct MenuPlugin;
 
-impl Plugin for MainMenuPlugin {
+impl Plugin for MenuPlugin {
     /// Build function similar to that in main setup.
     fn build(&self, app: &mut App) {
         app.add_event::<GameExitEvent>()
@@ -20,6 +24,11 @@ impl Plugin for MainMenuPlugin {
             .add_system(button_system);
     }
 }
+
+//-------------------------------------------------------------------------------------------------
+const NORMAL_BUTTON: Color = Color::rgb(0.8, 0.8, 0.8);
+const HOVERED_BUTTON: Color = Color::rgb(0.4, 0.8, 0.8);
+const PRESSED_BUTTON: Color = Color::rgb(0.4, 1.0, 1.0);
 
 pub struct GameExitEvent;
 
@@ -33,20 +42,20 @@ struct ClassicButton(ButtonType);
 #[derive(PartialEq, Copy, Clone)]
 enum ButtonType {
     Start,
-
     Stop,
-
     Exit,
 }
-
-pub struct MainMenuPlugin;
-
-//-------------------------------------------------------------------------------------------------
 
 /// A UI node that is a button
 fn build_classic_button(asset_server: &Res<AssetServer>) -> ButtonBundle {
     ButtonBundle {
-        style: Style { ..default() },
+        style: Style {
+            size: Size::new(Val::Px(150f32), Val::Px(50f32)),
+            margin: UiRect::all(Val::Auto),
+            justify_content: JustifyContent::Center,
+            align_items: AlignItems::Center,
+            ..default()
+        },
         // ? deprecated: color.
         background_color: NORMAL_BUTTON.into(),
         image: UiImage(asset_server.load("sprites/button.png")),
@@ -61,7 +70,7 @@ fn build_classic_text(value: &str, asset_server: &Res<AssetServer>) -> TextBundl
             value,
             TextStyle {
                 font: asset_server.load("fonts/Symtext.ttf"),
-                font_size: 30.0,
+                font_size: 30f32,
                 color: Color::rgb(0.9, 0.9, 0.9),
             },
         ),
@@ -110,8 +119,73 @@ fn button_system(
 
 //-------------------------------------------------------------------------------------------------
 
-/// AssetServer is the backend that hosts the events like Start, Stop..
+/// * AssetServer is the backend that hosts the events like Start, Stop..
+/// * Node bundle for root, that spans the entire game screen.
+/// * Add `with_children` a child that spans bottom 100px entire width.
+/// * Add bg panel.
+/// * Border
+/// * Fill.
 fn startup_system_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     // UI camera.
     commands.spawn(Camera2dBundle::default());
+
+    commands
+        .spawn(NodeBundle {
+            // root.
+            style: {
+                Style {
+                    size: Size::new(Val::Percent(100f32), Val::Percent(100f32)),
+                    justify_content: JustifyContent::SpaceBetween,
+                    ..default()
+                }
+            },
+            background_color: Color::NONE.into(),
+            ..default()
+        })
+        .with_children(|parent| {
+            parent
+                .spawn(NodeBundle /* Bottom button BG border. */ {
+                    style: Style {
+                        size: Size::new(Val::Percent(100f32), Val::Px(100f32)),
+                        border: UiRect::all(Val::Px(5f32)), // ? deprecated Rect for border - parent
+                        ..default()
+                    },
+                    background_color: Color::rgb(0.1, 0.1, 0.1).into(),
+                    ..default()
+                })
+                .with_children(|parent| {
+                    parent
+                        .spawn(NodeBundle /* Bottom button BG fill. */ {
+                            style: Style {
+                                size: Size::new(Val::Percent(100f32), Val::Percent(100f32)),
+                                align_items: AlignItems::FlexEnd,
+                                ..default()
+                            },
+                            background_color: Color::rgb(0.2, 0.2, 0.2).into(),
+                            ..default()
+                        })
+                        .with_children(|parent| {
+                            parent /* PLAY BUTTON. */
+                                .spawn(build_classic_button(&asset_server))
+                                .with_children(|parent| {
+                                    parent.spawn(build_classic_text("PLAY", &asset_server));
+                                })
+                                .insert(ClassicButton(ButtonType::Start));
+
+                            parent /* STOP BUTTON. */
+                                .spawn(build_classic_button(&asset_server))
+                                .with_children(|parent| {
+                                    parent.spawn(build_classic_text("STOP", &asset_server));
+                                })
+                                .insert(ClassicButton(ButtonType::Stop));
+
+                            parent /* QUIT BUTTON. */
+                                .spawn(build_classic_button(&asset_server))
+                                .with_children(|parent| {
+                                    parent.spawn(build_classic_text("QUIT", &asset_server));
+                                })
+                                .insert(ClassicButton(ButtonType::Exit));
+                        });
+                });
+        });
 }
