@@ -2,6 +2,15 @@
 
 ## Dev
 
+### Linting
+
+```bash
+cargo +nightly fmt
+
+```
+
+### Setup Bevy
+
 -   Enable Bevy's Dynamic Linking Feature: This is the most impactful compilation time decrease! If bevy
     is a dependency you can compile the binary with the "dynamic" feature flag (enables dynamic
     linking). Note that right now, this doesn't work on Windows. [Source](https://bevyengine.org/learn/book/getting-started/setup/)

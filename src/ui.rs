@@ -1,7 +1,6 @@
 //! This module implements the UI for the game of life.
 //!
 //! [Reference](https://github.com/bevyengine/bevy/blob/latest/examples/ui/button.rs)
-//!
 
 use bevy::prelude::*;
 
@@ -24,6 +23,7 @@ impl Plugin for MenuPlugin {
 }
 
 //-------------------------------------------------------------------------------------------------
+
 const NORMAL_BUTTON: Color = Color::rgb(0.8, 0.8, 0.8);
 const HOVERED_BUTTON: Color = Color::rgb(0.4, 0.8, 0.8);
 const PRESSED_BUTTON: Color = Color::rgb(0.4, 1.0, 1.0);
@@ -83,11 +83,10 @@ fn build_classic_text(value: &str, asset_server: &Res<AssetServer>) -> TextBundl
 fn button_system(
     mut interaction_query: Query<
         (&Interaction, &mut BackgroundColor, &ClassicButton),
-        (Changed<Interaction>, With<Button>),
+        (Changed<Interaction>, With<Button>), // Get entities that are necessary.
     >,
     mut start_writer: EventWriter<SimulationStartEvent>,
-    mut stop_writer: EventWriter<SimulationStopEvent>,
-    mut exit_writer: EventWriter<GameExitEvent>,
+    mut stop_writer: EventWriter<SimulationStopEvent>, mut exit_writer: EventWriter<GameExitEvent>,
 ) {
     for (interaction, mut color, classic_button) in interaction_query.iter_mut() {
         match *interaction {

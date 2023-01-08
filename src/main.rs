@@ -7,9 +7,15 @@ mod simulation;
 mod ui;
 
 use bevy::{
-    diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin},
+    diagnostic::{
+        FrameTimeDiagnosticsPlugin,
+        LogDiagnosticsPlugin,
+    },
     prelude::*,
-    window::{CursorGrabMode, PresentMode},
+    window::{
+        CursorGrabMode,
+        PresentMode,
+    },
 };
 use input::*;
 use simulation::*;
@@ -52,7 +58,7 @@ fn main() {
         .insert_resource(DisplayQuality::Medium)
         .insert_resource(Volume(7))
         // .add_plugin(SimulationPlugin)
-        // .add_plugin(InputPlugin)
+        .add_plugin(InputPlugin)
         .add_plugin(MenuPlugin)
         //bevy window stock systems.
         .add_plugin(LogDiagnosticsPlugin::default())
@@ -105,9 +111,7 @@ fn toggle_cursor(input: Res<Input<KeyCode>>, mut windows: ResMut<Windows>) {
 
 /// This system cycles the cursor's icon through a small set of icons when clicking
 fn cycle_cursor_icon(
-    input: Res<Input<MouseButton>>,
-    mut windows: ResMut<Windows>,
-    mut index: Local<usize>,
+    input: Res<Input<MouseButton>>, mut windows: ResMut<Windows>, mut index: Local<usize>,
 ) {
     const ICONS: &[CursorIcon] = &[
         CursorIcon::Default,
@@ -121,11 +125,7 @@ fn cycle_cursor_icon(
         *index = (*index + 1) % ICONS.len();
         window.set_cursor_icon(ICONS[*index]);
     } else if input.just_pressed(MouseButton::Right) {
-        *index = if *index == 0 {
-            ICONS.len() - 1
-        } else {
-            *index - 1
-        };
+        *index = if *index == 0 { ICONS.len() - 1 } else { *index - 1 };
         window.set_cursor_icon(ICONS[*index]);
     }
 }
